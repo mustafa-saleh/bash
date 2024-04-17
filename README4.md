@@ -100,8 +100,115 @@ fi
 # output: hello
 ```
 
+##### For Loop
 
+- The shell expands a string containing a * to all filenames that "match"
+- lists all the files and directories in the current directory `echo *`
+- for performing operations on the files in a directory
 
+```bash
+for X in *.html
+do
+    grep -L '<UL>' "$X"
+done
+```
 
+##### Command Substitution
 
+- There are two means of command substitution: brace expansion `$(commands)` and backtick expansion \`commands`.
 
+```bash
+files="$(ls)"
+web_files=`ls public_html`
+echo "$files"      # we need the quotes to preserve embedded newlines in $files
+echo "$web_files"  # we need the quotes to preserve newlines 
+X=`expr 3 \* 2 + 4` # expr evaluate arithmatic expressions. man expr for details.
+echo "$X"
+```
+
+## Looping and Skipping
+
+### References
+
+#### [Linux Bash Shell Scripting](https://bash.cyberciti.biz/guide/Main_Page)
+#### [For Loop Examples](https://www.cyberciti.biz/faq/bash-for-loop/)
+
+- Conditional exit with break
+
+```bash
+for I in 1 2 3 4 5
+do
+  statements1      #Executed for all values of ''I'', up to a disaster-condition if any.
+  statements2
+  if (disaster-condition)
+  then
+    break          #Abandon the loop.
+  fi
+  statements3      #While good and, no disaster-condition.
+done
+```
+
+- go though all files stored in /etc directory & find "resolv.conf"
+
+```bash
+# Count dns name server in the /etc/resolv.conf if found
+for file in /etc/*
+do
+    # check if file exists in bash using the if #  
+    if [ "${file}" == "/etc/resolv.conf" ]
+    then
+        countNameservers=$(grep -c nameserver /etc/resolv.conf)
+        echo "Total dns ${countNameservers} nameservers defined in ${file}"
+        break
+    fi
+done
+```
+
+- Early continuation with continue statement
+
+```bash
+for I in 1 2 3 4 5
+do
+  statements1      #Executed for all values of ''I'', up to a disaster-condition if any.
+  statements2
+  if (condition)
+  then
+    continue       #Go to next iteration of I in the loop and skip statements3
+  fi
+  statements3
+done
+```
+
+- This script make backup of all file names specified on command line
+
+```bash
+FILES="$@"
+for f in $FILES
+do
+    # if .bak backup file exists, read next file
+    if [ -f ${f}.bak ]
+    then
+        echo "Skiping $f file..."
+        continue  # read next file and skip the cp command
+    fi
+    # we are here means no backup file exists, just use cp command to copy file
+    /bin/cp $f $f.bak
+done
+```
+
+- loop with numbers
+
+```bash
+## example: ping cbz01, cbz02, cbz03, and cbz04 using a loop ##
+for i in 0{1..4}
+do
+    h="cbz${i}"
+    ping -c 1 -q "$h" &>/dev/null
+    if [ $? -eq 0 ]
+    then
+        echo "server $h alive"
+    else
+        echo "server $h dead or can not ping."
+    fi
+done
+```
